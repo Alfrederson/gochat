@@ -1,0 +1,3 @@
+Pra rodar:
+
+go run .
