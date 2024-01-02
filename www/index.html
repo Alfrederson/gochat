@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐿️ GoChat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body{
+            max-width: 100vw;
+            max-height: 100vh;
+            overflow-y: hidden;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container flex-column vh-100" >
+        <div class="d-flex flex-column vh-100">
+            <div class="flex-fill " style="overflow-y: auto; overflow-anchor: auto;">
+                <div id="chat-output"></div>
+            </div>
+            <form id="message-form" style="width:100%">
+                <div class="container p-4">
+                    <p class="badge text-dark" id="p-you"></p>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="mande um oi" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input">
+                        <div class="input-group-append">
+                            <input type="submit" class="btn btn-outline-secondary"></input>
+                        </div>
+                    </div> 
+                </div>
+            </form>                   
+        </div>         
+    </div>
+    
+    <script>
+        function e(strings, ...values) {
+            let result = strings[0];
+            values.forEach((value, i) => {
+                result += value + (strings[i + 1] || '');
+            });
+
+            return document.createElement(result);
+        }
+        const here = window.location.href
+        const urlWs = here.replace(/^http|https/,'ws') + "chat"
+        const urlId = here + "id"
+
+        const chatOutput = document.getElementById("chat-output");
+        const messageInput = document.getElementById("message-input");
+        const userIdDisplay = document.getElementById("p-you")
+        let socket
+        let thisUser = ""
+
+        // isso é pra gente pegar a tal identidade...
+        fetch( urlId ).then ( response =>{
+            return response.json()
+        }).then( tok =>{
+            console.log(tok.id)
+            let [id, salt, sign] = tok.id.split(".")
+            thisUser = atob(id)
+            userIdDisplay.innerText = "você é "+thisUser
+        }).then( ()=>{
+            ativarSocket()
+        })
+
+        let lastUser = ""
+        function adicionarMensagem({msg,user_id}){
+            const divMsg = e`div`
+                if(lastUser !== user_id && user_id != thisUser){
+                    const divUser = e`div`
+                    divUser.innerText = user_id
+                    divUser.className = "badge bg-light text-left text-dark"
+                    divMsg.appendChild(divUser)
+                }
+
+            /** @type{HTMLElement} */
+            const divTxt = e`div`
+            divTxt.innerText = msg
+            divTxt.className = "badge text-dark"
+
+            divMsg.appendChild(divTxt)
+
+            divMsg.className = "my-1 font-monospace" + (thisUser == user_id ? " bg-light" : "")
+
+            chatOutput.appendChild(divMsg)
+
+            lastUser = user_id
+        }
+
+        function ativarSocket(){
+            socket = new WebSocket(urlWs);            
+            // recebo mensagens...
+            socket.addEventListener("message", function (event) {
+                const message = event.data;
+                adicionarMensagem(JSON.parse(message))
+            });            
+        }
+        
+        // envio mensagens......
+        function sendMessage() {
+            if(!socket)
+                return;
+            const message = messageInput.value;
+            if (message.trim() !== "") {
+                socket.send(message);
+                messageInput.value = "";
+            }
+        }
+
+        const messageForm = document.getElementById("message-form")
+        messageForm.addEventListener("submit", event =>{
+            event.preventDefault()
+            sendMessage()
+        })
+    </script>
+</body>
+</html>
