@@ -39,7 +39,7 @@ func main() {
 	c.Setup()
 
 	fmt.Printf("Tentando escutar na porta %d ... \n", port)
-	if err := r.Run(fmt.Sprintf(":%d", port)); err != nil {
+	if err := r.Run(fmt.Sprintf("0.0.0.0:%d", port)); err != nil {
 		fmt.Println("Deu ruim: ", err)
 	}
 }

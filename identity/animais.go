@@ -31,7 +31,7 @@ var animais = []string{
 	"camelo",
 	"esquilo",
 	"tartaruga",
-	"ouriço",
+	"ourico",
 	"suricata",
 	"alce",
 	"foca",

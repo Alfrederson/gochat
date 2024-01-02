@@ -12,7 +12,8 @@ import (
 func (c *Chat) midIdentity() GinHandler {
 	return func(ctx *gin.Context) {
 		// cookie com a identidade
-		// se não tem a identidade, cai fora
+		// se não tem a identidade, cai fora pois está tentando entrar ilegalmente
+		// usamos o status code 451 para representar que a ação é ILEGAL
 		cookie, err := ctx.Request.Cookie("id")
 		if err != nil {
 			log.Println(err)
@@ -35,8 +36,7 @@ func (c *Chat) midIdentity() GinHandler {
 		}
 		// toma lá teu user
 		ctx.Set("id", &User{
-			Id:      id,
-			Channel: make(chan Message),
+			Id: id,
 		})
 		ctx.Next()
 	}

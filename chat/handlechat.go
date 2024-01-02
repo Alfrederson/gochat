@@ -29,9 +29,9 @@ func (c *Chat) handleChat() GinHandler {
 		// 2- ou o middleware não encontrou o cookie e não
 		//    chegou nessa função.
 		user := ctx.MustGet("id").(*User)
+		user.Channel = make(chan Message)
 		user.lastMessage = time.Now()
 		c.addUser(user)
-
 		defer conn.Close()
 
 		// pega todas as mensagens que tiver no canal do usuário e

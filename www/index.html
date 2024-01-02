@@ -16,19 +16,19 @@
 
     </style>
 </head>
-<body>
+<body class="bg-light">
     <div class="container flex-column vh-100" >
-        <div class="d-flex flex-column vh-100">
-            <div class="flex-fill " style="overflow-y: auto; overflow-anchor: auto;">
+        <div class="d-flex flex-column vh-100 px-0">
+            <div class="flex-fill" id="chat-container" style="overflow-y: auto; overflow-anchor: auto; margin-bottom:5em">
                 <div id="chat-output"></div>
             </div>
-            <form id="message-form" style="width:100%">
-                <div class="container p-4">
-                    <p class="badge text-dark" id="p-you"></p>
+            <form id="message-form" class="bg-secondary" style="width:100%; position: absolute; left:0px; bottom:0px;">
+                <div class="container p-2">
+                    <p class="badge text-dark m-1" id="p-you"></p>
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="mande um oi" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input">
                         <div class="input-group-append">
-                            <input type="submit" class="btn btn-outline-secondary"></input>
+                            <input type="submit" class="btn btn-secondary"></input>
                         </div>
                     </div> 
                 </div>
@@ -50,6 +50,8 @@
         const urlId = here + "id"
 
         const chatOutput = document.getElementById("chat-output");
+        const chatContainer = document.getElementById("chat-container");
+
         const messageInput = document.getElementById("message-input");
         const userIdDisplay = document.getElementById("p-you")
         let socket
@@ -73,10 +75,9 @@
                 if(lastUser !== user_id && user_id != thisUser){
                     const divUser = e`div`
                     divUser.innerText = user_id
-                    divUser.className = "badge bg-light text-left text-dark"
+                    divUser.className = "badge text-left text-dark bg-light"
                     divMsg.appendChild(divUser)
                 }
-
             /** @type{HTMLElement} */
             const divTxt = e`div`
             divTxt.innerText = msg
@@ -84,11 +85,13 @@
 
             divMsg.appendChild(divTxt)
 
-            divMsg.className = "my-1 font-monospace" + (thisUser == user_id ? " bg-light" : "")
+            divMsg.className = "my-1 font-monospace" + (thisUser == user_id ? " border border-info" : "")
 
             chatOutput.appendChild(divMsg)
 
             lastUser = user_id
+
+            chatContainer.scrollTop = chatContainer.scrollHeight
         }
 
         function ativarSocket(){
