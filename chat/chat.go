@@ -39,7 +39,9 @@ type Chat struct {
 	active      []*User
 	activeCount int
 
-	mutex sync.Mutex
+	history     []*Message
+	HistorySize int
+	mutex       sync.Mutex
 }
 
 type GinHandler = gin.HandlerFunc
@@ -69,6 +71,7 @@ func (c *Chat) Setup() {
 		panic("Chat criado sem coisinha de identidade")
 	}
 	c.active = make([]*User, 0, 10)
+	c.history = make([]*Message, 0, 10)
 
 	c.Engine.GET("/chat", c.midIdentity(), c.handleChat())
 	c.Engine.GET("/id", c.handleIdentity())
