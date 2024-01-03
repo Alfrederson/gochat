@@ -12,23 +12,24 @@
             overflow-y: hidden;
             overflow-x: hidden;
             display: flex;
+            background-color: black;
         }
 
     </style>
 </head>
-<body class="bg-light">
-    <div class="container flex-column vh-100" >
+<body>
+    <div class="container flex-column vh-100 font-monospace" >
         <div class="d-flex flex-column vh-100 px-0">
             <div class="flex-fill" id="chat-container" style="overflow-y: auto; overflow-anchor: auto; margin-bottom:5em">
                 <div id="chat-output"></div>
             </div>
             <form id="message-form" style="width:100%; position: absolute; left:0px; bottom:0px;">
                 <div class="container p-2">
-                    <p class="badge text-dark m-1" id="p-you"></p>
+                    <p class="badge text-success m-1" id="p-you"></p>
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="mande um oi" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input">
+                        <input type="text" class="form-control bg-dark text-success" placeholder="mande um oi" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input" autocomplete="off">
                         <div class="input-group-append">
-                            <input type="submit" class="btn btn-secondary"></input>
+                            <input type="submit" class="btn btn-outline-success"></input>
                         </div>
                     </div> 
                 </div>
@@ -75,25 +76,42 @@
 
         identificar()
 
-        let lastUser = ""
-        function adicionarMensagem({msg,user_id}){
-            const divMsg = e`div`
-                if(lastUser !== user_id && user_id != thisUser){
-                    const divUser = e`div`
-                    divUser.innerText = user_id
-                    divUser.className = "badge text-left text-dark bg-light"
-                    divMsg.appendChild(divUser)
+        function typeWritter(element, text){
+            let letters = 0
+            function type(){
+                if(letters < text.length){
+                    letters++
+                    element.innerText = text.slice(0,letters)
+                    setTimeout(type, 5)
                 }
+            }
+            type()
+        }
+
+        let lastUser = ""
+        /** @type{HTMLElement} */
+        let lastDiv = undefined
+        function adicionarMensagem({msg,user_id}){
+            const isPerson = user_id.startsWith("u")
+            if(!lastDiv || lastUser !== user_id || !isPerson){
+                lastDiv = e`div`
+                lastDiv.className = "my-1" + (thisUser == user_id ? " bg-success" : " bg-dark")
+                chatOutput.appendChild(lastDiv)
+            }
+            if(lastUser !== user_id && user_id != thisUser){
+                const divUser = e`div`
+                divUser.innerText = user_id
+                divUser.className = "text-success badge text-start" + (isPerson ? " fw-bolder fst-italic text-decoration-underline" : "")
+                lastDiv.appendChild(divUser)
+            }
             /** @type{HTMLElement} */
-            const divTxt = e`div`
-            divTxt.innerText = msg
-            divTxt.className = "badge text-dark"
+            const divTxt = e`span`
+            //divTxt.innerText = " "+msg
 
-            divMsg.appendChild(divTxt)
+            typeWritter(divTxt, " "+msg)
+            divTxt.className = "mx-0 px-1 text-start text-wrap " + (thisUser==user_id? "text-dark" : "text-success fst-italic")
 
-            divMsg.className = "my-1 font-monospace" + (thisUser == user_id ? " border border-info" : "")
-
-            chatOutput.appendChild(divMsg)
+            lastDiv.appendChild(divTxt)
 
             lastUser = user_id
 

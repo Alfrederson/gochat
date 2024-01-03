@@ -61,10 +61,6 @@ func (c *Chat) handleChat() GinHandler {
 			_, message, err := conn.ReadMessage()
 			// se não tem mais nada, it's over.
 			if err != nil {
-				c.broadcast(Message{
-					From:    "😔",
-					Content: user.Id + " saiu",
-				})
 				user.leave()
 				log.Println(user.Id + " saiu ")
 				break
