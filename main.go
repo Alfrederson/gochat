@@ -34,6 +34,7 @@ func main() {
 		Identity: &identity.Id{
 			Signature: "a soma de todos os medos",
 		},
+		HistorySize: 5,
 	}
 
 	c.Setup()

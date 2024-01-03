@@ -46,6 +46,11 @@ func (c *Chat) handleChat() GinHandler {
 			}
 		}()
 
+		// envia as mensagens velhas...
+		for _, message := range c.history {
+			conn.WriteJSON(message)
+		}
+
 		conn.WriteJSON(Message{
 			From:    "😀",
 			Content: fmt.Sprintf("Bem vindx, %s", user.Id),

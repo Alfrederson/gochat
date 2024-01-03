@@ -22,7 +22,7 @@
             <div class="flex-fill" id="chat-container" style="overflow-y: auto; overflow-anchor: auto; margin-bottom:5em">
                 <div id="chat-output"></div>
             </div>
-            <form id="message-form" class="bg-secondary" style="width:100%; position: absolute; left:0px; bottom:0px;">
+            <form id="message-form" style="width:100%; position: absolute; left:0px; bottom:0px;">
                 <div class="container p-2">
                     <p class="badge text-dark m-1" id="p-you"></p>
                     <div class="input-group">
@@ -58,16 +58,22 @@
         let thisUser = ""
 
         // isso é pra gente pegar a tal identidade...
-        fetch( urlId ).then ( response =>{
-            return response.json()
-        }).then( tok =>{
-            console.log(tok.id)
-            let [id, salt, sign] = tok.id.split(".")
-            thisUser = atob(id)
-            userIdDisplay.innerText = "você é "+thisUser
-        }).then( ()=>{
-            ativarSocket()
-        })
+
+        function identificar(){
+            let tok = localStorage.getItem("tok")
+            if (tok){
+                ativarSocket(tok)
+                return
+            }
+            fetch( urlId ).then ( response =>{
+                return response.json()
+            }).then( tok =>{
+                localStorage.setItem("tok",tok.id)
+                ativarSocket(tok.id)            
+            })
+        }
+
+        identificar()
 
         let lastUser = ""
         function adicionarMensagem({msg,user_id}){
@@ -94,13 +100,23 @@
             chatContainer.scrollTop = chatContainer.scrollHeight
         }
 
-        function ativarSocket(){
+        function ativarSocket(tok){
+            let [id, salt, sign] = tok.split(".")
+            thisUser = atob(id)
+            userIdDisplay.innerText = "você é "+thisUser
+
             socket = new WebSocket(urlWs);            
             // recebo mensagens...
             socket.addEventListener("message", function (event) {
                 const message = event.data;
                 adicionarMensagem(JSON.parse(message))
-            });            
+            });           
+            socket.addEventListener("error", function(event){
+                adicionarMensagem({msg: "erro. aperte f5, meu jovem", user_id:"🚨"})
+            })
+            socket.addEventListener("close", function(event){
+                adicionarMensagem({msg: "ejetado. aperte f5, meu jovem", user_id:"🚨"})
+            })
         }
         
         // envio mensagens......
