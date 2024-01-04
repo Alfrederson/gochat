@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -17,6 +18,10 @@ type IID interface {
 type Message struct {
 	From    string `json:"user_id"`
 	Content string `json:"msg"`
+}
+
+func (m *Message) FromJSON(jsonStr string) error {
+	return json.Unmarshal([]byte(jsonStr), m)
 }
 
 type User struct {
@@ -58,7 +63,7 @@ func (c *Chat) addUser(user *User) {
 func (c *Chat) handleIdentity() GinHandler {
 	return func(ctx *gin.Context) {
 		newId := c.Identity.Generate()
-		ctx.SetCookie("id", newId, int(time.Duration.Hours(24*30)), "*", "/", true, true)
+		ctx.SetCookie("id", newId, int(time.Duration.Hours(24*30)), "*", ctx.Request.URL.Host, true, true)
 		ctx.JSON(http.StatusOK, gin.H{
 			"msg": "ok!",
 			"id":  newId,
@@ -68,7 +73,7 @@ func (c *Chat) handleIdentity() GinHandler {
 
 func (c *Chat) Setup() {
 	if c.Identity == nil {
-		panic("Chat criado sem coisinha de identidade")
+		panic("chat criado sem coisinha de identidade")
 	}
 	c.active = make([]*User, 0, 10)
 	c.history = make([]*Message, 0, 10)
