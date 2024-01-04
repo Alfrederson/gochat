@@ -32,6 +32,7 @@ func main() {
 		},
 		Engine: r,
 		Identity: &identity.Id{
+			// NOTA MENTAL: se você estiver copiando e colando isso, certifique-se de não usar esse carimbo (tirar ele do environment ou do céu, não sei)
 			Signature: "a soma de todos os medos",
 		},
 		HistorySize: 5,
