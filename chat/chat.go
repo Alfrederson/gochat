@@ -63,10 +63,12 @@ func (c *Chat) addUser(user *User) {
 func (c *Chat) handleIdentity() GinHandler {
 	return func(ctx *gin.Context) {
 		newId := c.Identity.Generate()
-		ctx.SetCookie("id", newId, int(time.Duration.Hours(24*30)), "*", ctx.Request.URL.Host, true, true)
+		maxAge := 1000 * 60 * 60 * 24
+		ctx.SetCookie("id", newId, maxAge, "*", ctx.Request.URL.Host, true, true)
 		ctx.JSON(http.StatusOK, gin.H{
-			"msg": "ok!",
-			"id":  newId,
+			"msg":     "ok!",
+			"id":      newId,
+			"expires": maxAge,
 		})
 	}
 }
