@@ -53,7 +53,7 @@ func (c *Chat) handleChat() GinHandler {
 		}
 		conn.WriteJSON(Message{
 			From:    "😀",
-			Content: fmt.Sprintf("Bem vindx, %s. Este chat está rodando dentro de um TVBox!", user.Id),
+			Content: fmt.Sprintf("Bem vind_, %s. Este chat está rodando dentro de um TVBox!", user.Id),
 		})
 
 		for {
