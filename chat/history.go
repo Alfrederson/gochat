@@ -29,10 +29,10 @@ func (rb *History[T]) Add(item T) {
 }
 
 func (rb *History[T]) Unroll() []T {
-	result := make([]T, 0, rb.count)
+	result := make([]T, rb.count)
 	for i := 0; i < rb.count; i++ {
 		index := (rb.head + rb.size - i - 1) % rb.size
-		result = append(result, rb.buffer[index])
+		result[i] = rb.buffer[rb.count-1-index]
 	}
 	return result
 }
