@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -12,7 +13,7 @@ import (
 )
 
 func main() {
-
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	static := filepath.Join(".", "www")
@@ -35,13 +36,14 @@ func main() {
 			// NOTA MENTAL: se você estiver copiando e colando isso, certifique-se de não usar esse carimbo (tirar ele do environment ou do céu, não sei)
 			Signature: "a soma de todos os medos",
 		},
-		HistorySize: 5,
+		HistorySize: 25,
+		LogMessages: true,
 	}
 
 	c.Setup()
 
 	fmt.Printf("Tentando escutar na porta %d ... \n", port)
 	if err := r.Run(fmt.Sprintf("0.0.0.0:%d", port)); err != nil {
-		fmt.Println("Deu ruim: ", err)
+		log.Println("Deu ruim: ", err)
 	}
 }

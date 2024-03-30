@@ -19,7 +19,7 @@ func (c *Chat) handleChat() GinHandler {
 			ctx.Writer, ctx.Request, nil,
 		)
 		if err != nil {
-			log.Println(err)
+			log.Println("erro fazendo o upgrade de websocket:", err)
 			ctx.String(http.StatusInternalServerError, "ups")
 			return
 		}
@@ -29,7 +29,7 @@ func (c *Chat) handleChat() GinHandler {
 		// 2- ou o middleware não encontrou o cookie e não
 		//    chegou nessa função.
 		user := ctx.MustGet("id").(*User)
-		user.Channel = make(chan Message)
+		user.Channel = make(chan *Message)
 		user.lastMessage = time.Now()
 		c.addUser(user)
 		defer conn.Close()
@@ -47,13 +47,13 @@ func (c *Chat) handleChat() GinHandler {
 		}()
 
 		// envia as mensagens velhas...
-		for _, message := range c.history {
+		mensagens := c.history.Unroll()
+		for _, message := range mensagens {
 			conn.WriteJSON(message)
 		}
-
 		conn.WriteJSON(Message{
 			From:    "😀",
-			Content: fmt.Sprintf("Bem vindx, %s", user.Id),
+			Content: fmt.Sprintf("Bem vindx, %s. Este chat está rodando dentro de um TVBox!", user.Id),
 		})
 
 		for {
@@ -61,6 +61,7 @@ func (c *Chat) handleChat() GinHandler {
 			_, message, err := conn.ReadMessage()
 			// se não tem mais nada, it's over.
 			if err != nil {
+				log.Println("erro lendo a mensagem: ", err, " (o usuário provavelmente desconectou)")
 				user.leave()
 				log.Println(user.Id + " saiu ")
 				break
@@ -69,7 +70,7 @@ func (c *Chat) handleChat() GinHandler {
 			now := time.Now()
 			if time.Since(user.lastMessage) <= time.Second {
 				if !user.muted {
-					c.broadcast(Message{
+					c.broadcast(&Message{
 						From:    "😲",
 						Content: user.Id + " está surtando. Ativando SEDAÇÃO 💉",
 					})
@@ -77,7 +78,10 @@ func (c *Chat) handleChat() GinHandler {
 				user.muted = true
 			} else {
 				user.muted = false
-				c.broadcast(Message{
+				if c.LogMessages {
+					log.Println(user.Id, ">", string(message))
+				}
+				c.broadcast(&Message{
 					From:    user.Id,
 					Content: string(message),
 				})

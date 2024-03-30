@@ -2,6 +2,7 @@ package chat
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -26,7 +27,7 @@ func (m *Message) FromJSON(jsonStr string) error {
 
 type User struct {
 	Id      string
-	Channel chan Message
+	Channel chan *Message
 	Dead    bool
 
 	lastMessage time.Time
@@ -44,9 +45,12 @@ type Chat struct {
 	active      []*User
 	activeCount int
 
-	history     []*Message
+	//history     []*Message
+	history     *History[*Message]
 	HistorySize int
 	mutex       sync.Mutex
+
+	LogMessages bool
 }
 
 type GinHandler = gin.HandlerFunc
@@ -62,12 +66,18 @@ func (c *Chat) addUser(user *User) {
 // Envia um cookie de identidade.
 func (c *Chat) handleIdentity() GinHandler {
 	return func(ctx *gin.Context) {
-		newId := c.Identity.Generate()
-		maxAge := 1000 * 60 * 60 * 24
-		ctx.SetCookie("id", newId, maxAge, "*", ctx.Request.URL.Host, true, true)
+		// antes daqui, a requisição passa pelo middleware.
+		var id string
+		const maxAge = 1000 * 60 * 60 * 24
+		id, err := c.extractId(ctx)
+		if err != nil {
+			id = c.Identity.Generate()
+			log.Println("gerando nova identidade...")
+			ctx.SetCookie("id", id, maxAge, "*", ctx.Request.URL.Host, false, true)
+		}
 		ctx.JSON(http.StatusOK, gin.H{
 			"msg":     "ok!",
-			"id":      newId,
+			"id":      id,
 			"expires": maxAge,
 		})
 	}
@@ -78,7 +88,7 @@ func (c *Chat) Setup() {
 		panic("chat criado sem coisinha de identidade")
 	}
 	c.active = make([]*User, 0, 10)
-	c.history = make([]*Message, 0, 10)
+	c.history = NewHistory[*Message](c.HistorySize)
 
 	c.Engine.GET("/chat", c.midIdentity(), c.handleChat())
 	c.Engine.GET("/id", c.handleIdentity())
