@@ -39,6 +39,8 @@ go run .
 
 ## Deploy ao vivo e a cores
 
-https://gochat.fly.dev/
+https://chat.r718.org/
 
-Não vai ter ninguém dentro dele, mas se você mandar uma mensagem e receber ela de volta, significa que está funcionando.
+1- Provavelmente não vai ter ninguém dentro dele.
+
+2- Não estou mais rodando no fly.io, mas em um tv box, então talvez você não consiga ver o chat em ação, mas confia que ele funciona
