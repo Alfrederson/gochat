@@ -8,33 +8,41 @@
     <style>
         body{
             max-width: 100vw;
-            height: 100svh;
+            height: 100dvh;
             overflow-y: hidden;
             overflow-x: hidden;
             display: flex;
+            background:url(bg.jpg);
+            background-size:cover;
+            background-repeat:no-repeat;
+	    background-blend-mode:multiply;
+            background-color:rgb(138,150,125);
         }
         .bg-lime {
             background-color: rgb(169, 219, 119);
         }
+	.bg-translucido {
+		background-color: rgba(25,25,25,0.9);
+	}
         .text-lime {
             color: rgb(169, 219, 119) !important;
         }
     </style>
 </head>
-<body class="bg-dark">
-    <div class="container flex-column vh-100 font-monospace" >
-        <div class="d-flex flex-column vh-100 px-0">
-            <div class="flex-fill" id="chat-container" style="overflow-y: auto; overflow-anchor: auto; margin-bottom:5em">
-                <p class="bg-dark text-lime">Fizemos algumas mudanças. Se você já entrou no chat e agora não aparece nada, limpe seus biscoitos 🍪🍪🍪 e todos os dados do site.</p>
+<body>
+    <div class="container flex-column font-monospace" >
+        <div class="d-flex flex-column px-0" style="height:100%">
+            <p class="bg-translucido text-lime">Fizemos algumas mudanças. Se você já entrou no chat e agora não aparece nada, limpe seus biscoitos 🍪🍪🍪 e todos os dados do site.</p>
+            <div class="flex-fill" id="chat-container" style="overflow-y: auto; overflow-anchor: auto;">
                 <div id="chat-output"></div>
             </div>
-            <form id="message-form" style="width:100%; position: absolute; left:0px; bottom:0px;">
+            <form id="message-form" style="width:100%;">
                 <div class="container p-2">
-                    <p class="badge text-lime m-1" id="p-you"></p>
+                    <p class="badge text-lime m-1 bg-dark" id="p-you"></p>
                     <div class="input-group">
-                        <input type="text" class="form-control bg-dark text-lime" placeholder="mande um oi" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input" autocomplete="off">
+                        <input type="text" class="form-control bg-dark text-lime" placeholder="não escreva oi!" aria-label="Recipient's username" aria-describedby="basic-addon2" id="message-input" autocomplete="off">
                         <div class="input-group-append">
-                            <input type="submit" class="btn btn-outline-warning"></input>
+                            <input type="submit" class="btn btn-outline-warning bg-dark"></input>
                         </div>
                     </div> 
                 </div>
@@ -102,7 +110,7 @@
             const isPerson = user_id.startsWith("u")
             if(true){
                 lastDiv = e`div`
-                lastDiv.className = "my-0" + (thisUser == user_id ? " bg-lime" : " bg-dark")
+                lastDiv.className = "my-0" + (thisUser == user_id ? " bg-lime" : " bg-translucido")
                 chatOutput.appendChild(lastDiv)
             }
             if(user_id != thisUser){
