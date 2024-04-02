@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"github.com/Alfrederson/gochat/chat"
 	"github.com/Alfrederson/gochat/identity"
@@ -41,9 +44,17 @@ func main() {
 	}
 
 	c.Setup()
+	c.LoadHistory()
+	defer c.SaveHistory()
 
-	fmt.Printf("Tentando escutar na porta %d ... \n", port)
-	if err := r.Run(fmt.Sprintf("0.0.0.0:%d", port)); err != nil {
-		log.Println("Deu ruim: ", err)
-	}
+	go func() {
+		fmt.Printf("Tentando escutar na porta %d ... \n", port)
+		if err := r.Run(fmt.Sprintf("0.0.0.0:%d", port)); err != nil {
+			log.Println("Deu ruim: ", err)
+		}
+	}()
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
 }

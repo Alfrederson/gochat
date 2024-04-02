@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -83,13 +84,44 @@ func (c *Chat) handleIdentity() GinHandler {
 	}
 }
 
+func (c *Chat) SaveHistory() {
+	log.Println("salvando histórico...")
+	history := c.history.Unroll()
+	bytes, err := json.Marshal(history)
+	if err != nil {
+		log.Println("erro marshalizando histórico: ", err)
+		return
+	}
+	err = os.WriteFile("history.json", bytes, 0644)
+	if err != nil {
+		log.Println("erro persistindo histórico: ", err)
+	}
+}
+
+func (c *Chat) LoadHistory() {
+	log.Println("carregando histórico...")
+	bytes, err := os.ReadFile("history.json")
+	if err != nil {
+		log.Println("erro lendo histórico: ", err)
+		return
+	}
+	messages := make([]Message, 0, c.history.size)
+	err = json.Unmarshal(bytes, &messages)
+	if err != nil {
+		log.Println("erro desmarshalizando histórico: ", err)
+		return
+	}
+	for i := range messages {
+		c.history.Add(&messages[i])
+	}
+}
+
 func (c *Chat) Setup() {
 	if c.Identity == nil {
 		panic("chat criado sem coisinha de identidade")
 	}
 	c.active = make([]*User, 0, 10)
 	c.history = NewHistory[*Message](c.HistorySize)
-
 	c.Engine.GET("/chat", c.midIdentity(), c.handleChat())
 	c.Engine.GET("/id", c.handleIdentity())
 }
